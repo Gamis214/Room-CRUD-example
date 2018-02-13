@@ -25,6 +25,9 @@ public interface QuerysDAO {
     @Query("SELECT * FROM Person WHERE id = :idPerson")
     Maybe<Person> getPersonById(int idPerson);
 
+    @Query("DELETE FROM Person")
+    void deleteAllData();
+
     @Insert (onConflict = OnConflictStrategy.REPLACE)
     void insert(Person person);
 

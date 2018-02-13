@@ -54,4 +54,9 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemCount() {
         return lstPerson.size();
     }
+
+    public void removeAllItems(){
+        lstPerson.clear();
+        notifyDataSetChanged();
+    }
 }

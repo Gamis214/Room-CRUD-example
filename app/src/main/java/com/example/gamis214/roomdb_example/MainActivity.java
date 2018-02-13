@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity implements UtilsInterfaces{
 
     private Toolbar toolbar;
     private RecyclerView recyclerView;
+    private CustomAdapter customAdapter;
     private List<Person> lstperson = new ArrayList<>();
 
     @Override
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements UtilsInterfaces{
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        getAllUserFromDB();
+        getAllUserFromDB(UiUtils.INSERT);
     }
 
     private void populateListPerson(){
@@ -61,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements UtilsInterfaces{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.btnInsertAll:
+                Toast.makeText(this, "z", Toast.LENGTH_LONG).show();
+                break;
             case R.id.btnInsertar:
                 Toast.makeText(this, "a", Toast.LENGTH_LONG).show();
                 break;
@@ -71,40 +75,62 @@ public class MainActivity extends AppCompatActivity implements UtilsInterfaces{
                 Toast.makeText(this, "c", Toast.LENGTH_LONG).show();
                 break;
             case R.id.btnBorrarTodo:
-                Toast.makeText(this, "d", Toast.LENGTH_LONG).show();
-                break;
-            default:
+                UiUtils.deleteAllUsers(this,this);
                 break;
         }
         return true;
     }
 
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void onFinish(Object obj) {
-        if(obj instanceof Throwable){
-            Throwable e = (Throwable) obj;
-            e.printStackTrace();
-        }else if (obj instanceof ArrayList<?>){
-            List<Person> lstPerson = (List<Person>) obj;
-            if(lstPerson.size() > 0)
-                populateRecyclerView(lstPerson);
-            else
-                populateListPerson();
-        } else if(obj instanceof Integer){
-            getAllUserFromDB();
-        }
-    }
-
     private void populateRecyclerView(List<Person> lstPerson) {
+        customAdapter = new CustomAdapter(lstPerson);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
-        recyclerView.setAdapter(new CustomAdapter(lstPerson));
+        recyclerView.setAdapter(customAdapter);
     }
 
-    public void getAllUserFromDB(){
-        UiUtils.getAllPersonsDB(this,this);
+    public void getAllUserFromDB(String type){
+        UiUtils.getAllPersonsDB(this,this,type);
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void onFinishInsert(List<?> lst) {
+        List<Person> lstPerson = (List<Person>) lst;
+        if(lstPerson.size() > 0)
+            populateRecyclerView(lstPerson);
+        else
+            populateListPerson();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void onFinishConsult(List<?> lst, String type) {
+        List<Person> lstPerson = (List<Person>) lst;
+        Toast.makeText(this, "Data in DB: " +lstPerson.size(), Toast.LENGTH_SHORT).show();
+        switch (type){
+            case UiUtils.CONSULT:
+                customAdapter.removeAllItems();
+                break;
+        }
+    }
+
+    @Override
+    public void onFinishQuery(Integer i) {
+        Toast.makeText(this, "Finish Query", Toast.LENGTH_SHORT).show();
+        getAllUserFromDB(UiUtils.CONSULT);
+    }
+
+    @Override
+    public void onFinishInsertPrintData() {
+        getAllUserFromDB(UiUtils.INSERT);
+    }
+
+    @Override
+    public void onError(Throwable e) {
+        Toast.makeText(this, "Error MSG", Toast.LENGTH_SHORT).show();
+        e.printStackTrace();
+    }
+
+
 }
